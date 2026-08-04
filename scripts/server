@@ -55,9 +55,18 @@ fi
 
 # Start web server
 section "Start web server" "info"
+
+cert="$script_path"/../.certs/dev.crt
+key="$script_path"/../.certs/dev.key
+
+if [[ ! -f "${cert}" || ! -f "${key}" ]]; then
+  message "Development certificates not found, run: uv run poe certs" "error"
+  exit 1
+fi
+
 invenio run \
-       --cert "$script_path"/../docker/nginx/test.crt \
-       --key "$script_path"/../docker/nginx/test.key \
+       --cert "${cert}" \
+       --key "${key}" \
        -p $PORT & pid_server=$!
 
 message "Done" "success"
