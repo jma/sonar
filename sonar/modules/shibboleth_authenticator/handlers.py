@@ -52,7 +52,20 @@ def authorized_signup_handler(auth, remote=None, *args, **kwargs):
     if current_user.is_authenticated:
         logout_user()
 
-    account_info = get_account_info(auth.get_attributes(), remote)
+    attributes = auth.get_attributes()
+
+    # POC: inspect what the identity provider actually releases. To be removed.
+    print(f"=== SAML attributes released by {remote} ===")  # noqa: T201
+    for name, values in attributes.items():
+        print(f"  {name}: {values}")  # noqa: T201
+    # swissEduIDLinkedAffiliation, holding one "<role>@<scope>" per affiliation.
+    # A single SAML value may pack several of them, separated by spaces.
+    affiliations = [
+        affiliation for value in attributes.get("urn:oid:2.16.756.1.2.5.1.1.1029", []) for affiliation in value.split()
+    ]
+    print(f"=== affiliations (role@scope): {affiliations}")  # noqa: T201
+
+    account_info = get_account_info(attributes, remote)
 
     user = None
     # Pre-check done to use a case insensitive comparison because this is not
